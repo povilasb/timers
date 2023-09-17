@@ -1,0 +1,22 @@
+ControlButtons {
+    layout: horizontal;
+}
+
+LabelledTimer {
+    layout: horizontal;
+    background: $boost;
+    height: 3;
+    margin: 1;
+    min-width: 50;
+    padding: 1;
+}
+
+
+LabelledTimer > Label {
+    dock: left;
+}
+
+LabelledTimer > TimeDisplay {
+    content-align: right middle;
+    dock: right;
+}
