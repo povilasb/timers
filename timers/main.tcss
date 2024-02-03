@@ -11,6 +11,13 @@ LabelledTimer {
     padding: 1;
 }
 
+LabelledTimer.active {
+    background: yellow 50%;
+}
+
+LabelledTimer.finished {
+    background: green 50%;
+}
 
 LabelledTimer > Label {
     dock: left;

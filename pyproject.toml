@@ -11,6 +11,7 @@ python = "^3.10"
 python-vlc = "^3.0.18122"
 textual = "^0.37.1"
 pydantic = "^2.3.0"
+wakepy = "^0.7.1"
 
 [build-system]
 requires = ["poetry-core"]

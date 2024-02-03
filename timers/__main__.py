@@ -3,10 +3,11 @@ from pathlib import Path
 import vlc
 from pydantic import RootModel
 from textual.app import App, ComposeResult
-from textual.containers import Vertical
+from textual.containers import VerticalScroll
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widgets import Button, Footer, Label, Static, TabbedContent
+from wakepy import keep
 
 Timers = RootModel[dict[str, list[tuple[str, int]]]]
 TIMERS = Timers.model_validate_json(Path("timers.json").read_text())
@@ -27,7 +28,7 @@ class TimersApp(App):
         with TabbedContent(*TIMERS.root.keys()):
             for timer in TIMERS.root.values():
                 phases = [LabelledTimer(label, time_secs) for label, time_secs in timer]
-                yield Vertical(*phases)
+                yield VerticalScroll(*phases)
 
         yield Footer()
 
@@ -55,6 +56,12 @@ class TimersApp(App):
 
 
 class ControlButtons(Static):
+    DEFAULT_CSS = """
+    ControlButtons {
+        dock: top;
+    }
+    """
+
     def compose(self) -> ComposeResult:
         yield Button("Start", id="start", variant="success")
         yield Button("Stop", id="stop", variant="error")
@@ -78,6 +85,9 @@ class LabelledTimer(Static):
         self.toggle_class("inactive", "active")
         self.query_one(TimeDisplay).start()
 
+    def on_time_display_finished(self, msg: "TimeDisplay.Finished") -> None:
+        self.toggle_class("active", "finished")
+
 
 class TimeDisplay(Static):
     """A widget to display elapsed time."""
@@ -86,8 +96,6 @@ class TimeDisplay(Static):
 
     class Finished(Message):
         """Message sent when the timer finishes."""
-
-        ...
 
     def on_mount(self):
         self.update_timer = self.set_interval(1, self._update_time, pause=True)
@@ -112,9 +120,9 @@ class TimeDisplay(Static):
         self.time -= 1
         if self.time <= 0:
             self.update_timer.pause()
-            self.toggle_class("active", "finished")
             self.post_message(self.Finished())
 
 
 if __name__ == "__main__":
-    TimersApp().run()
+    with keep.running() as k:
+        TimersApp().run()
