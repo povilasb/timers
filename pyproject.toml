@@ -1,18 +1,21 @@
-[tool.poetry]
+[project]
 name = "timers"
 version = "0.1.0"
 description = "Time activities."
-authors = ["Povilas Balciunas <balciunas90@gmail.com>"]
-license = "MIT"
+authors = [
+    { name = "Povilas Balciunas", email = "balciunas90@gmail.com" }
+]
+license = { text = "MIT" }
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-python-vlc = "^3.0.18122"
-textual = "^0.37.1"
-pydantic = "^2.3.0"
-wakepy = "^0.7.1"
+requires-python = ">=3.13"
+dependencies = [
+    "textual==0.37.1",
+    "pydantic>=2.3.0",
+    "wakepy>=0.7.1",
+    "playsound>=1.3.0",
+    "pyobjc>=11.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
