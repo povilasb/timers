@@ -43,7 +43,7 @@ class TimersApp(App):
             self._start_next_timer()
 
     def on_time_display_finished(self, msg: "TimeDisplay.Finished") -> None:
-        vlc.MediaPlayer("bell.mp3").play()
+        _play_sound("bell.mp3")
         self._start_next_timer()
 
     def _start_next_timer(self) -> None:
@@ -52,7 +52,15 @@ class TimersApp(App):
                 timer.start()
                 return
 
-        vlc.MediaPlayer("tada.mp3").play()
+        _play_sound("tada.mp3")
+
+
+def _play_sound(fname: str) -> None:
+    try:
+        vlc.MediaPlayer(fname).play()
+    except:
+        # It tends to crash on MacOS after playing the sound.
+        ...
 
 
 class ControlButtons(Static):
