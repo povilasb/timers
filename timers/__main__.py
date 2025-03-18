@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import vlc
 from pydantic import RootModel
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
@@ -8,6 +7,7 @@ from textual.message import Message
 from textual.reactive import reactive
 from textual.widgets import Button, Footer, Label, Static, TabbedContent
 from wakepy import keep
+from playsound import playsound
 
 Timers = RootModel[dict[str, list[tuple[str, int]]]]
 TIMERS = Timers.model_validate_json(Path("timers.json").read_text())
@@ -43,7 +43,7 @@ class TimersApp(App):
             self._start_next_timer()
 
     def on_time_display_finished(self, msg: "TimeDisplay.Finished") -> None:
-        _play_sound("bell.mp3")
+        playsound("bell.mp3")
         self._start_next_timer()
 
     def _start_next_timer(self) -> None:
@@ -52,15 +52,7 @@ class TimersApp(App):
                 timer.start()
                 return
 
-        _play_sound("tada.mp3")
-
-
-def _play_sound(fname: str) -> None:
-    try:
-        vlc.MediaPlayer(fname).play()
-    except:
-        # It tends to crash on MacOS after playing the sound.
-        ...
+        playsound("tada.mp3")
 
 
 class ControlButtons(Static):
