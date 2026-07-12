@@ -1,6 +1,7 @@
 from pathlib import Path
+import tomllib
 
-from pydantic import RootModel
+from pydantic import BaseModel
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
 from textual.message import Message
@@ -9,8 +10,32 @@ from textual.widgets import Button, Footer, Label, Static, TabbedContent
 from wakepy import keep
 from playsound import playsound
 
-Timers = RootModel[dict[str, list[tuple[str, int]]]]
-TIMERS = Timers.model_validate_json(Path("timers.json").read_text())
+class Timer(BaseModel):
+    name: str
+    time: int
+
+
+class MultiphaseTimer(BaseModel):
+    name: str
+    phases: list[Timer] = []
+
+
+def _load_timers(path: Path | str) -> list[MultiphaseTimer]:
+    with open(path, "rb") as f:
+        data = tomllib.load(f)
+
+    timers = []
+
+    for name, phases in data.items():
+        multiphase_timer = MultiphaseTimer(name=name)
+        for (phase, time) in phases.items():
+            multiphase_timer.phases.append(Timer(name=phase, time=time))
+        timers.append(multiphase_timer)
+
+    return timers
+
+
+TIMERS = _load_timers("timers.toml")
 
 
 class TimersApp(App):
@@ -25,9 +50,9 @@ class TimersApp(App):
 
         yield ControlButtons()
 
-        with TabbedContent(*TIMERS.root.keys()):
-            for timer in TIMERS.root.values():
-                phases = [LabelledTimer(label, time_secs) for label, time_secs in timer]
+        with TabbedContent(*[timer.name for timer in TIMERS]):
+            for multiphase_timer in TIMERS:
+                phases = [LabelledTimer(timer.name, timer.time) for timer in multiphase_timer.phases]
                 yield VerticalScroll(*phases)
 
         yield Footer()
